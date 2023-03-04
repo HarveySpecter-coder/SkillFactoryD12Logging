@@ -67,7 +67,7 @@ best_user = Author.objects.all().order_by('-user_rating')
 print('The best user is ' + best_user[0].author.username)
 print('Rating: ' + str(best_user[0].user_rating))
 
-#Ищем и выводим лучшему посту
+#Ищем и выводим информацию лучшего поста
 best_article = Post.objects.all().order_by('-rating')[0]
 print("Best article information: ")
 print("create time: " + best_article.time_create.strftime("%Y-%m-%d %H:%M:%S"))
