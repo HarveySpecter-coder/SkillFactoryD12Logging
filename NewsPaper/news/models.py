@@ -10,8 +10,14 @@ class Author(models.Model):
 		self.user_rating = new_rating
 		self.save()
 
+	def __str__(self):
+		return f'{self.author}'
+
 class Category(models.Model):
 	new_category = models.CharField(max_length = 100, unique = True)
+
+	def __str__(self):
+		return f'{self.new_category}'
 
 class Post(models.Model):
 	POST_TYPE = [('AR', 'Статья'), ('NW', 'Новость')]
@@ -22,6 +28,9 @@ class Post(models.Model):
 	text = models.TextField()
 	rating = models.IntegerField(default = 0)
 	categories = models.ManyToManyField(Category, through='PostCategory')
+
+	def __str__(self):
+		return f'{self.title}. Posted {self.time_create}'
 
 	def like(self):
 		self.rating += 1
@@ -34,6 +43,9 @@ class Post(models.Model):
 	def preview(self):
 		size = 124 if len(self.text) > 125 else len(self.text)
 		return self.text[:size] + '...'
+
+	def get_absolute_url(self):
+		return f'/news/'
 
 class PostCategory(models.Model):
 	post = models.ForeignKey(Post, on_delete=models.CASCADE)
@@ -53,4 +65,3 @@ class Comment(models.Model):
 	def dislike(self):
 		self.rating -= 1
 		self.save()
-
