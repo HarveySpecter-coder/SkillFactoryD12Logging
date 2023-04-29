@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'news',
+    'sign',
+    'protect',
 ]
 
 MIDDLEWARE = [
@@ -115,7 +117,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
@@ -125,4 +127,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/admin/'
+LOGIN_URL = 'sign/login/'
+LOGIN_REDIRECT_URL = '/'
