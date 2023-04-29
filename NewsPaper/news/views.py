@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, CreateView
 from .models import Post
@@ -19,7 +20,7 @@ class PostDetail(DetailView):
     template_name = 'news_detail.html'
     queryset = Post.objects.all()
 
-class PostEdit(UpdateView):
+class PostEdit(LoginRequiredMixin, UpdateView):
     model = Post
     template_name = 'news_edit.html'
     form_class = NewsEditForm
