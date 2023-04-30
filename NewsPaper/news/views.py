@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, CreateView
 from .models import Post
@@ -20,10 +20,11 @@ class PostDetail(DetailView):
     template_name = 'news_detail.html'
     queryset = Post.objects.all()
 
-class PostEdit(LoginRequiredMixin, UpdateView):
+class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Post
     template_name = 'news_edit.html'
     form_class = NewsEditForm
+    permission_required = ('news.change_post',)
 
 
 # class Test(ListView):
@@ -41,12 +42,14 @@ class Test2(FilterView):
     template_name = 'search.html'
     filterset_class = PostFilter
 
-class PostDelete(DeleteView):
+class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Post
     template_name = 'news_delete.html'
     success_url = reverse_lazy('')
+    permission_required = 'news.delete_post'
 
-class PostCreate(CreateView):
+class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Post
     template_name = 'news_add.html'
     form_class = NewsAddForm
+    permission_required = 'news.add_post'
