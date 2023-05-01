@@ -12,13 +12,20 @@ class PostsList(ListView):
     model = Post
     template_name ='news.html'
     context_object_name = 'news'
-    queryset = Post.objects.order_by('-time_create')
     paginate_by = 10
-
+    def get_queryset(self):
+        if len(self.kwargs):
+            category = Category.objects.get(id=self.kwargs['category_id'])
+            queryset = Post.objects.filter(categories=category).order_by('-time_create')
+        else:
+            queryset = Post.objects.order_by('-time_create')
+        return queryset
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_author'] = self.request.user.groups.filter(name = 'Authors').exists()
         context['categories'] = Category.objects.all()
+        if len(self.kwargs):
+            context['category_name'] = Category.objects.get(id=self.kwargs['category_id'])
         return context
 
 

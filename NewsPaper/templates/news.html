@@ -12,15 +12,20 @@
     <div class="conteiner">
         <div class="item sidebar">
             <h3>Категории:</h3>
-            <ul id='category_list'>
+            <ul>
                 {% for category in categories %}
-            <li id="category_li"><button id="category_buttons">{{ category }}</button></li>
+            <li><button id="category_buttons"><a class="a_cat_filter" href="{% url 'category_filter' category.id %}">{{ category }}</a></button></li>
                 {% endfor %}
             </ul>
         </div>
-
     <div class="item content">
-<h1>Количество новостей на этой странице: {{news|length}}</h1>
+
+    {% if not category_name %}
+        <h1 id="count_cat_news">Новости по всем категориям</h1>
+    {% else %}
+        <h1 id="count_cat_news">Новости: {{ category_name }}</h1>
+    {% endif %}
+
 {% for onenews in news%}
     <a href="{% url 'post_detail' onenews.id %}"><h3>{{onenews.title|censor}}</h3></a>
     {{onenews.text|truncatechars:50|censor}}
