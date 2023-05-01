@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, CreateView
-from .models import Post
+from .models import Post, Category
 from .filters import PostFilter
 from django_filters.views import FilterView
 from .forms import NewsEditForm, NewsAddForm
@@ -15,16 +15,27 @@ class PostsList(ListView):
     queryset = Post.objects.order_by('-time_create')
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_author'] = self.request.user.groups.filter(name = 'Authors').exists()
+        context['categories'] = Category.objects.all()
+        return context
+
 
 class PostDetail(DetailView):
     template_name = 'news_detail.html'
     queryset = Post.objects.all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_author'] = self.request.user.groups.filter(name = 'Authors').exists()
+        return context
 
 class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Post
     template_name = 'news_edit.html'
     form_class = NewsEditForm
     permission_required = ('news.change_post',)
+
 
 
 # class Test(ListView):
