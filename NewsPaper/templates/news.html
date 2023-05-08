@@ -28,9 +28,12 @@
     {% else %}
         <h1 id="count_cat_news">Новости: {{ category_name }}</h1>
         <div class="d-grid gap-2 col-2 mx-auto">
-            {%  if user.is_authenticated %}
-                <button type="button" class="btn btn-primary btn-sm">ПОДПИСАТЬСЯ</button>
+            {% if not user_subsсribed %}
+                <a href="{% url 'subscribe' %}?category_name={{ category_name }}"><button type="button" class="btn btn-primary btn-sm">ПОДПИСАТЬСЯ</button></a>
+            {% else %}
+                <button type="button" class="btn btn-primary btn-sm">ВЫ ПОДПИСАНЫ</button>
             {% endif %}
+
         </div>
     {% endif %}
 

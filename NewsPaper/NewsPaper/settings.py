@@ -146,6 +146,8 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+
+DEFAULT_FROM_EMAIL = os.getenv('E_MAIL_FULL')
 SITE_ID = 1
 
 ACCOUNT_EMAIL_REQUIRED = True
