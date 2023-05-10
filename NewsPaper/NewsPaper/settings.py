@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
-    'news',
+    'news.apps.NewsConfig',
     'sign',
     'protect',
 ]
@@ -146,6 +146,9 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+load_dotenv()
+env_path = Path('../../.env')
+load_dotenv(dotenv_path=env_path)
 
 DEFAULT_FROM_EMAIL = os.getenv('E_MAIL_FULL')
 SITE_ID = 1
@@ -154,17 +157,15 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_FORMS = {'signup': 'sign.forms.BasicSignUpForm'}
 
 # E-Mail Service Yandex
-load_dotenv()
-env_path = Path('../../.env')
-load_dotenv(dotenv_path=env_path)
-
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = os.getenv('E_MAIL')
 EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD')
 EMAIL_USE_SSL = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

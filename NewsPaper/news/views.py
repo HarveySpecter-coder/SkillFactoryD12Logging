@@ -1,16 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, CreateView
-from .models import Post, Category, Subscribers
+from .models import Post, Category, Subscribers, PostCategory
 from .filters import PostFilter
 from django_filters.views import FilterView
 from django.contrib.auth.decorators import login_required
 from .forms import NewsEditForm, NewsAddForm
-
-from django.core.mail import EmailMultiAlternatives, get_connection
-from django.template.loader import render_to_string
-
+from django.utils import timezone
+from django.http import HttpResponseRedirect
 
 # Create your views here.
 class PostsList(ListView):
@@ -52,17 +50,6 @@ class PostEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     form_class = NewsEditForm
     permission_required = ('news.change_post',)
 
-
-
-# class Test(ListView):
-#     model = Post
-#     template_name = 'search.html'
-#     context_object_name = 'search'
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())
-#         context['form'] = ExampleForm
-#         return context
 class Test2(FilterView):
     model = Post
     context_object_name = 'search'
@@ -81,34 +68,20 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     form_class = NewsAddForm
     permission_required = 'news.add_post'
 
-    # прекрасно понимаю, что писать цикл здесь, да ещё при отправке формы глупо,
-    # но это лишь для теста. Позже отрефачю
-    # За массову рассылку яндекс отправил меня в бан на 24 часа :)
+
     def form_valid(self, form):
-        news_category_added = form.cleaned_data['categories'].first()
-        subscribers_to_this_category = Subscribers.objects.filter(news_category__new_category=news_category_added)
-        user_names = list(subscribers_to_this_category.values_list('user__username', flat=True))
-        user_emails = list(subscribers_to_this_category.values_list('user__email', flat=True))
-        user_names_emails = dict(zip(user_emails, user_names))
-        connection = get_connection()
-        connection.open()
-        emails = []
-        title = form.cleaned_data['title']
-        text = form.cleaned_data['text']
-        for recipient in user_names_emails:
-            context = {'username': user_names_emails[recipient], 'title': title, 'text':text[0:51]}
-            html_content = render_to_string('subscribers.html', context)
-            email = EmailMultiAlternatives(
-                subject=title,
-                body=text,
-                from_email='aleek.sedler@yandex.ru',
-                to=[recipient]
-            )
-            email.attach_alternative(html_content, "text/html")
-            emails.append(email)
-        connection.send_messages(emails)
-        connection.close()
+        self.object = form.save(commit=False)
+        user_posts_count = Post.objects.filter(author=self.object.author,
+                                               time_create__date=timezone.now().date()).count()
+        if user_posts_count >= 3:
+            return HttpResponseRedirect(reverse('warning'))
+        self.object.save()
+        form.save_m2m()
         return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['current_user'] = self.request.user
+        return kwargs
 
 
 @login_required
@@ -116,9 +89,15 @@ def subscribe(request):
     user = request.user
     category = Category.objects.get(new_category=request.GET.get('category_name'))
     if not Subscribers.objects.filter(user=user).exists():
-        Subscribers.objects.create(user=user)
+        new_subscriber = Subscribers.objects.create(user=user)
+        category.subscribers_set.add(new_subscriber)
     else:
         obj_subscribe = Subscribers.objects.get(user=user)
         category.subscribers_set.add(obj_subscribe)
 
     return redirect('/news/category/' + str(category.pk))
+
+def warning(request):
+    user = request.user
+    context = {'username': user.username}
+    return render(request, 'warning.html', context)

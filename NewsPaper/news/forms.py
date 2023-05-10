@@ -7,8 +7,14 @@ class NewsEditForm(ModelForm):
         fields = ['title', 'text']
 
 class NewsAddForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user')
+        super(NewsAddForm, self).__init__(*args, **kwargs)
+        self.fields['author'].queryset = Author.objects.filter(author=self.current_user)
+        self.fields['author'].initial = Author.objects.get(author=self.current_user)
+        self.fields['author'].disabled = True
+
     categories = Category.objects.all()
-    author = Author.objects.all()
     class Meta:
         model = Post
-        fields = ['title', 'text', 'author', 'categories']
+        fields = ['title', 'text', 'categories', 'author']
