@@ -17,7 +17,9 @@ def test_signal(sender, instance, action, model, pk_set, **kwargs):
             .values_list('user__email', 'user__username')
         user_emails_names_subscribed = dict(user_emails_names_subscribed)
 
-        #send e-mails
+        # send e-mails
+        # некогда было рефачить
+        # лучше передать его в scheduler в будущем
         connection = get_connection()
         connection.open()
         emails = []
@@ -40,9 +42,3 @@ def test_signal(sender, instance, action, model, pk_set, **kwargs):
             emails.append(email)
         connection.send_messages(emails)
         connection.close()
-
-# @receiver(pre_save, sender=Post)
-# def check_user_post_limit(sender, instance, **kwargs):
-#     user_posts_count = Post.objects.filter(author=instance.author, time_create__date=timezone.now().date()).count()
-#     if user_posts_count >= 3:
-#         return HttpResponseRedirect(reverse(''))

@@ -51,7 +51,6 @@ class Post(models.Model):
 class PostCategory(models.Model):
 	post = models.ForeignKey(Post, on_delete=models.CASCADE)
 	category = models.ForeignKey(Category, on_delete = models.CASCADE)
-
 	def __str__(self):
 		return f'Title: {self.post.title} Category: {self.category.new_category}'
 
@@ -77,5 +76,4 @@ class Subscribers(models.Model):
 	def __str__(self):
 		category_list = list(self.news_category.all().values_list("new_category", flat=True))
 		category_list_str = ', '.join(category_list)
-		Author.objects.filter(author__username='greenfreedom7')
 		return f'Пользователь "{self.user.username}" подписан на категории: {category_list_str}'

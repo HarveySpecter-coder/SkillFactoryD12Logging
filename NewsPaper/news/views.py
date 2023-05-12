@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, CreateView
-from .models import Post, Category, Subscribers, PostCategory
+from .models import Post, Category, Subscribers
 from .filters import PostFilter
 from django_filters.views import FilterView
 from django.contrib.auth.decorators import login_required
