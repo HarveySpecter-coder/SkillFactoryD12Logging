@@ -18,7 +18,7 @@ def test_signal(sender, instance, action, model, pk_set, **kwargs):
         user_emails_names_subscribed = dict(user_emails_names_subscribed)
 
         # send e-mails
-        # некогда было рефачить
+        # некогда было рефач
         # лучше передать его в scheduler в будущем
         connection = get_connection()
         connection.open()
