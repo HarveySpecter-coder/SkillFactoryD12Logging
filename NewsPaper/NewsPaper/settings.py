@@ -172,3 +172,12 @@ EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD')
 EMAIL_USE_SSL = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# cache
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
+    }
+}

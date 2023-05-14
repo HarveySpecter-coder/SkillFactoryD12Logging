@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import NewsEditForm, NewsAddForm
 from django.utils import timezone
 from django.http import HttpResponseRedirect
+from django.core.cache import cache
 
 # Create your views here.
 class PostsList(ListView):
@@ -39,6 +40,14 @@ class PostsList(ListView):
 class PostDetail(DetailView):
     template_name = 'news_detail.html'
     queryset = Post.objects.all()
+
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'news-{self.kwargs["pk"]}', None)
+
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'news - {self.kwargs["pk"]}', obj)
+        return obj
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_author'] = self.request.user.groups.filter(name = 'Authors').exists()

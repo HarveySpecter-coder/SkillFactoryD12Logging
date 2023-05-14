@@ -11,6 +11,8 @@
 
 {% block content %}
     <div class="conteiner">
+        {% load cache %}
+        {% cache 1800 categories_list_cash %}
         <div class="item sidebar">
             <h3>Категории:</h3>
             <ul>
@@ -21,6 +23,7 @@
                 {% endfor %}
             </ul>
         </div>
+        {% endcache %}
     <div class="item content">
 
     {% if not category_name %}
