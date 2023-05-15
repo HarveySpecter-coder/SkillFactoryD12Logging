@@ -29,9 +29,12 @@ class Post(models.Model):
 	rating = models.IntegerField(default = 0)
 	categories = models.ManyToManyField(Category, through='PostCategory')
 
+	# @property
+	# def category(self):
+	# 	category = list(self.categories.values_list('pk', flat=True))
+	# 	return '' if len(category) == 0 else Category.objects.get(pk = category[0]).new_category
 	def __str__(self):
-		return f'{self.title}. Posted {self.time_create.strftime("%d:%m:%Y")}. \
-		Автор: {self.author.author.username}'
+		return f'{self.title}.'
 
 	def like(self):
 		self.rating += 1
@@ -76,8 +79,3 @@ class Comment(models.Model):
 class Subscribers(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	news_category = models.ManyToManyField(to=Category)
-
-	def __str__(self):
-		category_list = list(self.news_category.all().values_list("new_category", flat=True))
-		category_list_str = ', '.join(category_list)
-		return f'Пользователь "{self.user.username}" подписан на категории: {category_list_str}'
