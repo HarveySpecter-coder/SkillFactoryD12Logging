@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-3*8rq*y)*ldyh^++23b=##%2a5=9n*1br)-j4yokh6l8@@+2=#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'django_apscheduler',
-
+    'django.contrib.postgres',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -88,11 +88,21 @@ WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
 }
 
 
@@ -181,3 +191,120 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
     }
 }
+
+# Остальные настройки...
+
+# Путь к директории, где будут сохраняться лог-файлы
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+
+# Форматтеры
+LOG_FORMAT = '{asctime} {levelname} {message}'
+
+# Общие настройки для всех обработчиков логов
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console_formatter': {
+            'format': LOG_FORMAT,
+            'style': '{',
+        },
+        'file_formatter': {
+            'format': '{asctime} {levelname} {module} {message}',
+            'style': '{',
+        },
+        'error_file_formatter': {
+            'format': '{asctime} {levelname} {message}\n{pathname}\n{exc_info}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console_formatter',
+        },
+        'general_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'general.log'),
+            'maxBytes': 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'file_formatter',
+        },
+        'errors_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'errors.log'),
+            'maxBytes': 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'error_file_formatter',
+        },
+        'security_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'security.log'),
+            'maxBytes': 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'file_formatter',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'error_file_formatter',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins', 'errors_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['mail_admins', 'errors_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['errors_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['errors_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'general_file'],
+        'level': 'DEBUG',
+    },
+}
+
+if DEBUG:
+    if 'errors_file' in LOGGING['loggers']['django.request']['handlers']:
+        LOGGING['loggers']['django.request']['handlers'].remove('errors_file')
+    if 'errors_file' in LOGGING['loggers']['django.server']['handlers']:
+        LOGGING['loggers']['django.server']['handlers'].remove('errors_file')
+    if 'errors_file' in LOGGING['loggers']['django.template']['handlers']:
+        LOGGING['loggers']['django.template']['handlers'].remove('errors_file')
+    if 'errors_file' in LOGGING['loggers']['django.db.backends']['handlers']:
+        LOGGING['loggers']['django.db.backends']['handlers'].remove('errors_file')
+else:
+    if 'console' in LOGGING['loggers']['django.request']['handlers']:
+        LOGGING['loggers']['django.request']['handlers'].remove('console')
+    if 'console' in LOGGING['loggers']['django.server']['handlers']:
+        LOGGING['loggers']['django.server']['handlers'].remove('console')
+    if 'console' in LOGGING['root']['handlers']:
+        LOGGING['root']['handlers'].remove('console')
